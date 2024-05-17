@@ -1,0 +1,1566 @@
+question,query,db_name,db_type,generated_query_1,generated_query_2,exact_match_1,exact_match_2,correct_1,correct_2,err_1,err_2,latency_seconds_1,latency_seconds_2,latency_seconds_extract_tables,extracted_tables,error_msg_1,error_msg_2,,
+What is the level wise diversity ratio for account id 1245?,"SELECT level, COUNT(*) AS total_employees, COUNT(*) FILTER (WHERE gender = 'Male') AS male_count, COUNT(*) FILTER (WHERE gender = 'Female') AS female_count, COUNT(*) FILTER (WHERE gender NOT IN ('Male', 'Female')) AS other_gender_count, CASE WHEN COUNT(*) > 0 THEN ROUND(COUNT(*) FILTER (WHERE gender = 'Female')::decimal / COUNT(*), 2) ELSE 0 END AS female_ratio, CASE WHEN COUNT(*) > 0 THEN ROUND(COUNT(*) FILTER (WHERE gender = 'Male')::decimal / COUNT(*), 2) ELSE 0 END AS male_ratio, CASE WHEN COUNT(*) > 0 THEN ROUND(COUNT(*) FILTER (WHERE gender NOT IN ('Male', 'Female'))::decimal / COUNT(*), 2) ELSE 0 END AS other_gender_ratio FROM employees WHERE account_id = 1245 GROUP BY level ORDER BY level;",crux_assign,postgres,"WITH total_employees AS (
+    SELECT COUNT(*) AS total_count
+    FROM employees
+    WHERE account_id = 1245
+),
+level_wise_employees AS (
+    SELECT level, COUNT(*) AS count
+    FROM employees
+    WHERE account_id = 1245
+    GROUP BY level
+)
+SELECT level, count, ROUND((count * 100.0) / (SELECT total_count FROM total_employees), 2) AS diversity_ratio
+FROM level_wise_employees;","WITH total_count AS (
+    SELECT COUNT(*) AS total_employees
+    FROM employees
+    WHERE account_id = 1245
+),
+level_count AS (
+    SELECT level, COUNT(*) AS level_count
+    FROM employees
+    WHERE account_id = 1245
+    GROUP BY level
+)
+SELECT level, level_count, total_employees, ROUND(CAST(level_count AS numeric) / NULLIF(total_employees, 0), 2) AS diversity_ratio
+FROM level_count, total_count;",0,0,0,0,0,0,3.49766540527344,2.76231980323791,13.1892223358154,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE accounts (
+  id bigint,
+  logo character varying,
+  ceo_id bigint,
+  timezone character varying,
+  created_at timestamp without time zone,
+  enable_kpi boolean,
+  updated_at timestamp without time zone,
+  domain_name character varying,
+  account_type character varying,
+  company_name character varying,
+  country_code character varying,
+  email_client character varying,
+  metabase_type bigint,
+  planning_year bigint,
+  remote_policy character varying,
+  setting_tokens character varying,
+  record_sessions boolean,
+  trial_objective character varying,
+  messaging_client bigint,
+  survey_frequency character varying,
+  enable_okr_update boolean,
+  preferred_product character varying,
+  company_size_range character varying,
+  run_coffee_connect boolean,
+  department_hierachy character varying,
+  company_phone_number character varying,
+  enable_goal_metadata boolean,
+  glassdoor_review_link character varying,
+  create_private_reviews boolean,
+  signupform_communication_tool character varying
+);",,,,
+What is the trend of diversity ratio since 2020 for account id 2875,"SELECT EXTRACT( YEAR FROM date_of_joining ) AS year, ROUND( COUNT( CASE WHEN gender = 'Female' THEN 1 END )::NUMERIC / COUNT( CASE WHEN gender = 'Male' THEN 1 END ), 2 ) AS diversity_ratio FROM employees WHERE account_id = 2875 AND date_of_joining >= '2020-01-01' GROUP BY year ORDER BY year;",crux_assign,postgres,"SELECT TO_CHAR(created_at, 'DD-MM-YYYY') AS date, COUNT(DISTINCT employee_id) / COUNT(DISTINCT manager_id) AS diversity_ratio
+FROM employees
+WHERE account_id = 2875 AND EXTRACT(YEAR FROM created_at) >= 2020
+GROUP BY TO_CHAR(created_at, 'DD-MM-YYYY')
+ORDER BY TO_CHAR(created_at, 'DD-MM-YYYY') ASC;","SELECT TO_CHAR(created_at, 'DD-MM-YYYY') AS date, account_type, company_name, country_code, company_size_range, department_hierachy FROM accounts WHERE id = 2875 AND created_at >= '01-01-2020' ORDER BY created_at ASC;",0,0,0,0,1,0,3.0702862739563,2.14978861808777,6.13903570175171,"CREATE TABLE accounts (
+  id bigint,
+  logo character varying,
+  ceo_id bigint,
+  timezone character varying,
+  created_at timestamp without time zone,
+  enable_kpi boolean,
+  updated_at timestamp without time zone,
+  domain_name character varying,
+  account_type character varying,
+  company_name character varying,
+  country_code character varying,
+  email_client character varying,
+  metabase_type bigint,
+  planning_year bigint,
+  remote_policy character varying,
+  setting_tokens character varying,
+  record_sessions boolean,
+  trial_objective character varying,
+  messaging_client bigint,
+  survey_frequency character varying,
+  enable_okr_update boolean,
+  preferred_product character varying,
+  company_size_range character varying,
+  run_coffee_connect boolean,
+  department_hierachy character varying,
+  company_phone_number character varying,
+  enable_goal_metadata boolean,
+  glassdoor_review_link character varying,
+  create_private_reviews boolean,
+  signupform_communication_tool character varying
+);","Error (psycopg2.errors.UndefinedColumn) column ""employee_id"" does not exist
+LINE 1: ...created_at, 'DD-MM-YYYY') AS date, COUNT(DISTINCT employee_i...
+                                                             ^
+
+[SQL: SELECT TO_CHAR(created_at, 'DD-MM-YYYY') AS date, COUNT(DISTINCT employee_id) / COUNT(DISTINCT manager_id) AS diversity_ratio
+FROM employees
+WHERE account_id = 2875 AND EXTRACT(YEAR FROM created_at) >= 2020
+GROUP BY TO_CHAR(created_at, 'DD-MM-YYYY')
+ORDER BY TO_CHAR(created_at, 'DD-MM-YYYY') ASC;]
+(Background on this error at: https://sqlalche.me/e/20/f405)",,,
+What is the Attrition by manager for 2023 for account id 1245?,"SELECT managers.id AS manager_id, managers.full_name AS manager_name, COUNT(employees.id) AS total_reportees, COUNT(CASE WHEN EXTRACT(YEAR FROM employees.date_of_exit) = 2023 THEN 1 ELSE NULL END) AS attrition_count FROM employees managers LEFT JOIN employees ON employees.manager_id = managers.id WHERE managers.account_id = 1245 GROUP BY managers.id, managers.full_name HAVING COUNT(employees.manager_id) > 0;",crux_assign,postgres,"SELECT employees.manager_id, COUNT(*) AS attrition_count
+FROM employees
+WHERE deactivated_at IS NOT NULL
+AND EXTRACT(YEAR FROM deactivated_at) = 2023
+AND account_id = 1245
+GROUP BY employees.manager_id;","SELECT e.manager_id, COUNT(*) AS attrition_count
+FROM employees e
+WHERE e.account_id = 1245
+AND EXTRACT(YEAR FROM e.date_of_exit) = 2023
+GROUP BY e.manager_id;",0,0,0,0,0,0,1.8407473564148,1.84122180938721,9.5178587436676,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE reviewees (
+  id bigint,
+  created_at timestamp without time zone,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  confidential boolean,
+  discarded_at timestamp without time zone,
+  one_on_one_id bigint,
+  review_cycle_id bigint,
+  custom_attribute character varying,
+  custom_variables character varying,
+  self_review_done boolean,
+  goal_approval_done boolean,
+  peer_approval_done boolean,
+  goal_selection_done boolean,
+  peer_selection_done boolean,
+  release_review_done boolean,
+  manager_summary_done boolean,
+  review_writing_percent numeric(38,9),
+  competency_approval_done boolean,
+  competency_selection_done boolean
+);
+",,,,
+What is the Attrition by Grade for account id 1245?,"SELECT level AS grade, COUNT(*) AS total_employees, COUNT(date_of_exit) AS attrition_count FROM employees WHERE account_id = 1245 GROUP BY level ORDER BY level;",crux_assign,postgres,"SELECT employees.level AS grade, COUNT(*) AS attrition_count
+FROM employees
+WHERE employees.account_id = 1245 AND employees.date_of_exit IS NOT NULL
+GROUP BY employees.level;","SELECT e.level AS grade, COUNT(e.id) AS attrition_count
+FROM employees e
+WHERE e.account_id = 1245 AND e.date_of_exit IS NOT NULL
+GROUP BY e.level;",0,0,0,0,0,0,2.14837741851807,1.60591554641724,9.44681334495544,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);",,,,
+What is the Attrition by Role for account id 1245?,"SELECT title AS role, COUNT(*) AS total_employees, COUNT(date_of_exit) AS attrition_count FROM employees WHERE account_id = 1245 GROUP BY title ORDER BY title;",crux_assign,postgres,"SELECT e.org_role AS role, COUNT(*) AS attrition_count
+FROM employees e
+WHERE e.account_id = 1245 AND e.date_of_exit IS NOT NULL
+GROUP BY e.org_role;","SELECT employees.org_role AS role, COUNT(*) AS attrition_count FROM employees WHERE employees.account_id = 1245 AND employees.date_of_exit IS NOT NULL GROUP BY employees.org_role;",0,0,0,0,0,0,2.14880394935608,1.84141540527344,7.98326659202576,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);",,,,
+What is the Attrition by Tenure for account id 1245?,"WITH TenureData AS ( SELECT date_of_joining, date_of_exit, EXTRACT(YEAR FROM AGE(COALESCE(date_of_exit, CURRENT_DATE), date_of_joining)) AS tenure_years FROM employees WHERE account_id = 1245),TenureGroups AS ( SELECT CASE WHEN tenure_years < 1 THEN 'Less than 1 year' WHEN tenure_years >= 1 AND tenure_years < 2 THEN '1-2 years' WHEN tenure_years >= 2 AND tenure_years < 5 THEN '2-5 years' WHEN tenure_years >= 5 AND tenure_years < 10 THEN '5-10 years' WHEN tenure_years >= 10 THEN 'More than 10 years' ELSE 'Unknown' END AS tenure_group, (date_of_exit IS NOT NULL) AS has_exited FROM TenureData) SELECT tenure_group, COUNT(*) AS total_employees, SUM(CASE WHEN has_exited THEN 1 ELSE 0 END) AS attrition_count FROM TenureGroups GROUP BY tenure_group ORDER BY CASE WHEN tenure_group = 'Less than 1 year' THEN 1 WHEN tenure_group = '1-2 years' THEN 2 WHEN tenure_group = '2-5 years' THEN 3 WHEN tenure_group = '5-10 years' THEN 4 WHEN tenure_group = 'More than 10 years' THEN 5 ELSE 6 END;",crux_assign,postgres,"SELECT employees.tenure, COUNT(employees.id) AS attrition_count
+FROM employees
+WHERE employees.account_id = 1245
+GROUP BY employees.tenure
+ORDER BY employees.tenure ASC;","SELECT ROUND(COUNT(CASE WHEN date_of_exit IS NOT NULL THEN 1 END)::numeric / COUNT(*) * 100, 2) AS attrition_rate FROM employees WHERE account_id = 1245;",0,0,0,0,1,1,1.84277272224426,1.84182357788086,10.4381504058838,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE review_responses (
+  id bigint,
+  score numeric(38,9),
+  goal_id bigint,
+  option_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  question_id bigint,
+  schedule_id bigint,
+  discarded_at timestamp without time zone,
+  is_responded boolean,
+  response_text character varying,
+  employee_chat_id bigint,
+  responded_by_whom_id bigint,
+  reminder_mail_sent_at timestamp without time zone,
+  response_text_sentiment numeric(38,9),
+  reminder_mail_sent_count bigint,
+  response_text_word_count bigint
+);","Error (psycopg2.errors.UndefinedColumn) column employees.tenure does not exist
+LINE 1: SELECT employees.tenure, COUNT(employees.id) AS attrition_co...
+               ^
+
+[SQL: SELECT employees.tenure, COUNT(employees.id) AS attrition_count
+FROM employees
+WHERE employees.account_id = 1245
+GROUP BY employees.tenure
+ORDER BY employees.tenure ASC;]
+(Background on this error at: https://sqlalche.me/e/20/f405)","Error (psycopg2.errors.DivisionByZero) division by zero
+
+[SQL: SELECT ROUND(COUNT(CASE WHEN date_of_exit IS NOT NULL THEN 1 END)::numeric / COUNT(*) * 100, 2) AS attrition_rate FROM employees WHERE account_id = 1245;]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)",,
+What is the engagement trend of each department for account id 1245?,"SELECT dp.name AS departmentName, s.id AS scheduleId, AVG(r.nps_score) AS score FROM responses r JOIN employee_chats ec ON r.employee_chat_id = ec.id JOIN employees e ON e.id = ec.employee_id JOIN schedules s ON s.id = ec.schedule_id JOIN departments dp ON dp.id = e.department_id JOIN questions q ON q.id = r.question_id JOIN drivers d ON d.id = q.driver_id WHERE e.account_id = 1245 AND d.key = 'engagement' AND q.question_type = 'nps' GROUP BY dp.name, s.id ORDER BY dp.name, s.id;",crux_assign,postgres,"SELECT departments.name AS department_name, TO_CHAR(employees.created_at, 'DD-MM-YYYY') AS join_date, COUNT(employees.id) AS total_employees FROM departments JOIN employees ON departments.id = employees.department_id WHERE employees.account_id = 1245 GROUP BY departments.name, join_date ORDER BY join_date ASC;","SELECT departments.name AS department_name, TO_CHAR(pulses.created_at, 'DD-MM-YYYY') AS pulse_date, COUNT(pulses.id) AS engagement_count
+FROM departments
+JOIN employees ON departments.id = employees.department_id
+JOIN pulses ON employees.id = pulses.employee_id
+WHERE departments.account_id = 1245
+GROUP BY departments.name, pulse_date
+ORDER BY department_name, pulse_date;",1,1,1,1,0,0,2.45659422874451,2.19810843467712,16.8453981876373,"CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);
+
+CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE pulses (
+  id bigint,
+  status bigint,
+  end_date timestamp without time zone,
+  account_id bigint,
+  created_at timestamp without time zone,
+  manager_id bigint,
+  pulse_type bigint,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  reportee_id bigint,
+  reviewed_on timestamp without time zone,
+  schedule_id bigint,
+  pulseable_id bigint,
+  submitted_on timestamp without time zone,
+  one_on_one_id bigint,
+  pulseable_type character varying
+);
+
+CREATE TABLE responses (
+  id bigint,
+  closed_at timestamp without time zone,
+  is_closed boolean,
+  nps_score bigint,
+  option_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  question_id bigint,
+  schedule_id bigint,
+  discarded_at timestamp without time zone,
+  is_responded boolean,
+  response_text character varying,
+  employee_chat_id bigint,
+  responded_by_whom_id bigint,
+  reminder_mail_sent_at timestamp without time zone,
+  response_text_sentiment numeric(38,9),
+  reminder_mail_sent_count bigint,
+  response_text_word_count bigint
+);",,,,
+What is the span of control of the organisation for account id 10,"WITH ManagerCounts AS ( SELECT manager_id FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL GROUP BY manager_id),TotalDirectReports AS ( SELECT COUNT(*) AS total_direct_reports FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL),TotalManagers AS ( SELECT COUNT(*) AS total_managers FROM ManagerCounts) SELECT total_direct_reports::FLOAT / total_managers AS average_span_of_control FROM TotalDirectReports, TotalManagers;",crux_assign,postgres,SELECT COUNT(DISTINCT manager_id) AS span_of_control FROM employees WHERE account_id = 10,,SELECT department_hierachy FROM accounts WHERE id = 10,,0,,0,0,1,1,0,0,5.27021479606628,"CREATE TABLE accounts (
+    id bigint,
+    logo character varying,
+    ceo_id bigint,
+    timezone character varying,
+    created_at timestamp without time zone,
+    enable_kpi boolean,
+    updated_at timestamp without time zone,
+    domain_name character varying,
+    account_type character varying,
+    company_name character varying,
+    country_code character varying,
+    email_client character varying,
+    metabase_type bigint,
+    planning_year bigint,
+    remote_policy character varying,
+    setting_tokens character varying,
+    record_sessions boolean,
+    trial_objective character varying,
+    messaging_client bigint,
+    survey_frequency character varying,
+    enable_okr_update boolean,
+    preferred_product character varying,
+    company_size_range character varying,
+    run_coffee_connect boolean,
+    department_hierachy character varying,
+    company_phone_number character varying,
+    enable_goal_metadata boolean,
+    glassdoor_review_link character varying,
+    create_private_reviews boolean,
+    signupform_communication_tool character varying
+);","Error (psycopg2.errors.DivisionByZero) division by zero
+
+[SQL: WITH ManagerCounts AS ( SELECT manager_id FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL GROUP BY manager_id),TotalDirectReports AS ( SELECT COUNT(*) AS total_direct_reports FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL),TotalManagers AS ( SELECT COUNT(*) AS total_managers FROM ManagerCounts) SELECT total_direct_reports::FLOAT / total_managers AS average_span_of_control FROM TotalDirectReports, TotalManagers]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)","Error (psycopg2.errors.DivisionByZero) division by zero
+
+[SQL: WITH ManagerCounts AS ( SELECT manager_id FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL GROUP BY manager_id),TotalDirectReports AS ( SELECT COUNT(*) AS total_direct_reports FROM employees WHERE account_id = 10 AND manager_id IS NOT NULL),TotalManagers AS ( SELECT COUNT(*) AS total_managers FROM ManagerCounts) SELECT total_direct_reports::FLOAT / total_managers AS average_span_of_control FROM TotalDirectReports, TotalManagers]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)"
+Which team has the highest attrition for account id 1245?,"WITH DepartmentEmployees AS ( SELECT department_id, department_name, COUNT(*) FILTER (WHERE date_of_joining < '2024-01-01'::timestamp AND (date_of_exit IS NULL OR date_of_exit > '2023-01-01'::timestamp)) AS StartingEmployees, COUNT(*) FILTER (WHERE date_of_joining >= '2023-01-01'::timestamp AND date_of_joining < '2024-01-01'::timestamp) AS NewHires, COUNT(*) FILTER (WHERE date_of_exit >= '2023-01-01'::timestamp AND date_of_exit < '2024-01-01'::timestamp) AS Exits FROM employees WHERE account_id = 1245 AND (date_of_joining < '2024-01-01'::timestamp OR date_of_exit BETWEEN '2023-01-01'::timestamp AND '2023-12-31'::timestamp) GROUP BY department_id, department_name) SELECT department_id, department_name, StartingEmployees, NewHires, Exits, CASE WHEN (StartingEmployees + NewHires) = 0 THEN NULL ELSE ROUND((Exits::NUMERIC / (StartingEmployees + NewHires)) * 100, 2) END AS AttritionPercentage FROM DepartmentEmployees;",crux_assign,postgres,"SELECT department_name, COUNT(*) as attrition_count
+FROM employees
+WHERE account_id = 1245 AND deactivated_at IS NOT NULL
+GROUP BY department_name
+ORDER BY attrition_count DESC
+LIMIT 1;","SELECT department_name, COUNT(*) as attrition_count
+FROM employees
+WHERE account_id = 1245 AND date_of_exit IS NOT NULL
+GROUP BY department_name
+ORDER BY attrition_count DESC
+LIMIT 1;",0,0,0,0,0,0,2.15849852561951,1.53801321983337,8.93488836288452,"CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);
+
+CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+",,,,
+What is the headcount trend by employment type for Tremblay Inc(10)?,"WITH yearly_trend AS ( SELECT EXTRACT(YEAR FROM date_of_joining) AS year, employment_type, COUNT(CASE WHEN date_of_joining IS NOT NULL THEN 1 END) AS join_count, COUNT(CASE WHEN date_of_exit IS NOT NULL THEN 1 END) AS exit_count FROM employees WHERE account_id = 10 GROUP BY EXTRACT(YEAR FROM date_of_joining), employment_type) SELECT year, employment_type, SUM(join_count - exit_count) OVER (PARTITION BY employment_type ORDER BY year) AS headcount_trend FROM yearly_trend ORDER BY employment_type, year;",crux_assign,postgres,"SELECT TO_CHAR(e.date_of_joining, 'DD-MM-YYYY') AS join_date, e.employment_type, COUNT(e.id) AS headcount
+FROM employees e
+WHERE e.account_id = 10
+GROUP BY join_date, e.employment_type
+ORDER BY join_date;","SELECT e.employment_type AS employment_type, COUNT(e.id) AS headcount FROM employees e WHERE e.account_id = 10 GROUP BY e.employment_type;",1,0,1,0,0,0,2.15447902679443,1.1771445274353,10.151869058609,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);",,,,
+Can you break down the attrition rate by manager for Tremblay Inc(10)?,"SELECT m.full_name AS manager_name, COUNT(CASE WHEN e.date_of_exit IS NOT NULL THEN 1 END) AS exit_count, COUNT(*) AS total_employees, ROUND(COUNT(CASE WHEN e.date_of_exit IS NOT NULL THEN 1 END) * 100.0 / COUNT(*), 2) AS attrition_rate FROM employees e JOIN employees m ON e.manager_id = m.id WHERE e.account_id = 10 GROUP BY m.full_name;",crux_assign,postgres,"SELECT e.manager_id, COUNT(e.id) AS total_employees, COUNT(e.date_of_exit) AS exited_employees, (COUNT(e.date_of_exit) * 100.0 / COUNT(e.id)) AS attrition_rate
+FROM employees e
+WHERE e.account_id = 10
+GROUP BY e.manager_id;","SELECT e.manager_id, COUNT(*) AS total_employees, COUNT(e.date_of_exit) AS exited_employees, (COUNT(e.date_of_exit) * 100.0 / NULLIF(COUNT(*), 0)) AS attrition_rate FROM employees e WHERE e.account_id = 10 GROUP BY e.manager_id;",1,1,1,1,0,0,2.51193451881409,2.15203785896301,14.141633272171,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE review_responses (
+  id bigint,
+  score numeric(38,9),
+  goal_id bigint,
+  option_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  question_id bigint,
+  schedule_id bigint,
+  discarded_at timestamp without time zone,
+  is_responded boolean,
+  response_text character varying,
+  employee_chat_id bigint,
+  responded_by_whom_id bigint,
+  reminder_mail_sent_at timestamp without time zone,
+  response_text_sentiment numeric(38,9),
+  reminder_mail_sent_count bigint,
+  response_text_word_count bigint
+);
+
+CREATE TABLE users (
+  id bigint,
+  role bigint,
+  email character varying,
+  api_token character varying,
+  uniq_code character varying,
+  bypass_sso boolean,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  login_count bigint,
+  self_signed_up boolean,
+  password_digest character varying
+);",,,,
+What is the annual attrition trend at Tremblay Inc(10)?,"WITH yearly_trend AS ( SELECT EXTRACT(YEAR FROM date_of_exit) AS year, COUNT(CASE WHEN date_of_exit IS NOT NULL THEN 1 END) AS exit_count FROM employees WHERE account_id = 10 AND EXTRACT(YEAR FROM date_of_exit) IS NOT NULL GROUP BY EXTRACT(YEAR FROM date_of_exit)) SELECT year, SUM(exit_count) AS exit_trend FROM yearly_trend GROUP by YEAR ORDER BY year;",crux_assign,postgres,"SELECT TO_CHAR(date_of_exit, 'YYYY') AS exit_year, COUNT(*) AS attrition_count
+FROM employees
+WHERE account_id = 10
+GROUP BY exit_year
+ORDER BY exit_year;","SELECT TO_CHAR(date_of_exit, 'YYYY') AS exit_year, COUNT(*) AS attrition_count FROM employees WHERE account_id = 10 AND date_of_exit IS NOT NULL GROUP BY exit_year ORDER BY exit_year;",1,1,1,1,0,0,1.84245276451111,1.53565812110901,19.0554821491241,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE review_cycles (
+  id bigint,
+  title character varying,
+  status character varying,
+ account_id bigint,
+  created_at timestamp without time zone,
+  creator_id bigint,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  archived_at timestamp without time zone,
+  gsheet_info character varying,
+  discarded_at timestamp without time zone,
+  last_synced_at timestamp without time zone,
+  charts_metadata character varying,
+  duplicated_from bigint,
+  show_key_results boolean,
+  anonymize_reports boolean,
+  review_cycle_phase character varying,
+  auto_progress_manager boolean,
+  auto_create_one_on_one character varying,
+  auto_progress_employee character varying,
+  competency_config_json character varying,
+  view_unsubmitted_reviews boolean,
+  template_employee_attribute character varying,
+  review_type character varying
+);
+
+CREATE TABLE reviewee_competencies (
+  id bigint,
+  exclude boolean,
+  weightage numeric(38,9),
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  approver_id bigint,
+  description character varying,
+  reviewee_id bigint,
+  discarded_at timestamp without time zone,
+  competency_id bigint,
+  rejected_by_id bigint,
+  competency_name character varying,
+  review_cycle_id bigint,
+  competency_theme_id bigint,
+  competency_theme_name character varying
+);
+
+CREATE TABLE reviewees (
+  id bigint,
+  created_at timestamp without time zone,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  confidential boolean,
+  discarded_at timestamp without time zone,
+  one_on_one_id bigint,
+  review_cycle_id bigint,
+  custom_attribute character varying,
+  custom_variables character varying,
+  self_review_done boolean,
+  goal_approval_done boolean,
+  peer_approval_done boolean,
+  goal_selection_done boolean,
+  peer_selection_done boolean,
+  release_review_done boolean,
+  manager_summary_done boolean,
+  review_writing_percent numeric(38,9),
+  competency_approval_done boolean,
+  competency_selection_done boolean
+);
+
+CREATE TABLE review_responses (
+  id bigint,
+  score numeric(38,9),
+  goal_id bigint,
+  option_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  question_id bigint,
+  reviewee_id bigint,
+  reviewer_id bigint,
+  discarded_at timestamp without time zone,
+  calibrator_id bigint,
+  response_text character varying,
+  review_cycle_id bigint,
+  calibrated_score numeric(38,9),
+  reviewee_employee_id bigint,
+  reviewer_employee_id bigint,
+  reviewee_competency_id bigint,
+  calibrated_response_text character varying,
+  calibrated_score_option_id bigint,
+  review_cycle_template_question_id bigint,
+  template_question_id bigint
+);",,,,
+"List all employees along with their current goals, the corresponding goal cycle, and progress percentage:","SELECT e.full_name, g.title, gc.name as cycle_name, gp.progress_percent FROM employees e JOIN employee_goals eg ON e.id = eg.employee_id JOIN goals g ON eg.goal_id = g.id JOIN goal_cycles gc ON g.goal_cycle_id = gc.id JOIN goal_progresses gp ON g.id = gp.goal_id WHERE g.discarded_at IS NULL AND gp.discarded_at IS NULL;",crux_assign,postgres,"SELECT e.full_name AS employee_name, g.title AS goal_title, gc.name AS goal_cycle, gp.progress_percent AS progress_percentage
+FROM employees e
+LEFT JOIN employee_goals eg ON e.id = eg.employee_id
+LEFT JOIN goals g ON eg.goal_id = g.id
+LEFT JOIN goal_cycles gc ON g.goal_cycle_id = gc.id
+LEFT JOIN goal_progresses gp ON g.id = gp.goal_id;","SELECT e.full_name AS employee_name, g.title AS goal_title, gc.name AS goal_cycle, gp.progress_percent AS progress_percentage
+FROM employees e
+LEFT JOIN goals g ON e.account_id = g.account_id
+LEFT JOIN goal_cycles gc ON g.goal_cycle_id = gc.id
+LEFT JOIN goal_progresses gp ON g.id = gp.goal_id
+WHERE gp.updated_at = (SELECT MAX(updated_at) FROM goal_progresses WHERE goal_id = g.id);",1,1,1,1,0,0,2.72639465332031,2.46038508415222,11.7186009883881,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE goal_progresses (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  progress_start numeric(38,9),
+  progress_status bigint,
+  progress_target numeric(38,9),
+  progress_weight bigint,
+  current_progress numeric(38,9),
+  progress_percent numeric(38,9),
+  goal_progress_type_id bigint
+);
+
+CREATE TABLE goal_cycles (
+  id bigint,
+  name character varying,
+  year character varying,
+  cycle character varying,
+  end_date timestamp without time zone,
+  account_id bigint,
+  cycle_type character varying,
+  start_date timestamp without time zone
+);",,,,
+Find the average progress percentage of goals by goal type for a specific year,"SELECT g.goal_type, AVG(gp.progress_percent) AS avg_progress FROM goals g JOIN goal_progresses gp ON g.id = gp.goal_id JOIN goal_cycles gc ON g.goal_cycle_id = gc.id WHERE gc.year = '2022' AND g.discarded_at IS NULL AND gp.discarded_at IS NULL GROUP BY g.goal_type;",crux_assign,postgres,"SELECT goals.goal_type AS goal_type, AVG(goal_progresses.progress_percent) AS avg_progress_percentage
+FROM goals
+JOIN goal_progresses ON goals.id = goal_progresses.goal_id
+WHERE goals.start_date >= '01-01-2024' AND goals.start_date <= '31-12-2024'
+GROUP BY goals.goal_type;","SELECT g.goal_type, AVG(gp.progress_percent) AS avg_progress_percentage
+FROM goals g
+JOIN goal_progresses gp ON g.id = gp.goal_id
+JOIN goal_cycles gc ON g.goal_cycle_id = gc.id
+WHERE EXTRACT(YEAR FROM gc.start_date) = 2024
+GROUP BY g.goal_type;",1,1,1,1,0,0,2.45360732078552,2.25902986526489,7.6143946647644,"CREATE TABLE goal_progresses (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  progress_start numeric(38,9),
+  progress_status bigint,
+  progress_target numeric(38,9),
+  progress_weight bigint,
+  current_progress numeric(38,9),
+  progress_percent numeric(38,9),
+  goal_progress_type_id bigint
+);
+
+CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE goal_cycles (
+  id bigint,
+  name character varying,
+  year character varying,
+  cycle character varying,
+  end_date timestamp without time zone,
+  account_id bigint,
+  cycle_type character varying,
+  start_date timestamp without time zone
+);",,,,
+Get the top 5 departments with the highest number of goals set for a particular cycle,"SELECT d.name, COUNT(g.id) AS goals_count FROM departments d JOIN goals_departments gd ON d.id = gd.department_id JOIN goals g ON gd.goal_id = g.id JOIN goal_cycles gc ON g.goal_cycle_id = gc.id WHERE gc.name = 'Annual' AND d.active = TRUE AND g.discarded_at IS NULL GROUP BY d.name ORDER BY goals_count DESCLIMIT 5;",crux_assign,postgres,"SELECT department_name, COUNT(*) AS total_goals
+FROM goals_departments
+WHERE goal_cycle_id = 123
+GROUP BY department_name
+ORDER BY total_goals DESC
+LIMIT 5;","SELECT departments.name AS department_name, COUNT(goals.id) AS total_goals
+FROM departments
+LEFT JOIN goals ON departments.id = goals.department_id
+WHERE goals.goal_cycle_id = 123
+GROUP BY departments.name
+ORDER BY total_goals DESC
+LIMIT 5;",0,0,0,0,1,1,3.59257888793945,2.15257549285889,8.41031837463379,"CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);
+
+CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE goal_cycles (
+  id bigint,
+  name character varying,
+  year character varying,
+  cycle character varying,
+  end_date timestamp without time zone,
+  account_id bigint,
+  cycle_type character varying,
+  start_date timestamp without time zone
+);","Error (psycopg2.errors.UndefinedColumn) column ""department_name"" does not exist
+LINE 1: SELECT department_name, COUNT(*) AS total_goals
+               ^
+
+[SQL: SELECT department_name, COUNT(*) AS total_goals
+FROM goals_departments
+WHERE goal_cycle_id = 123
+GROUP BY department_name
+ORDER BY total_goals DESC
+LIMIT 5;]
+(Background on this error at: https://sqlalche.me/e/20/f405)","Error (psycopg2.errors.SyntaxError) syntax error at or near ""DESCLIMIT""
+LINE 1: ...d_at IS NULL GROUP BY d.name ORDER BY goals_count DESCLIMIT ...
+                                                             ^
+
+[SQL: SELECT d.name, COUNT(g.id) AS goals_count FROM departments d JOIN goals_departments gd ON d.id = gd.department_id JOIN goals g ON gd.goal_id = g.id JOIN goal_cycles gc ON g.goal_cycle_id = gc.id WHERE gc.name = 'Annual' AND d.active = TRUE AND g.discarded_at IS NULL GROUP BY d.name ORDER BY goals_count DESCLIMIT 5]
+(Background on this error at: https://sqlalche.me/e/20/f405)",,
+List employees who have not updated their goals since a specific date,"SELECT e.full_name, g.title, MAX(ga.checkin_time) AS last_checkin FROM employees e JOIN employee_goals eg ON e.id = eg.employee_id JOIN goals g ON eg.goal_id = g.id JOIN goal_activities ga ON g.id = ga.goal_id WHERE ga.checkin_time < '2023-01-01' AND g.discarded_at IS NULL GROUP BY e.full_name, g.title HAVING MAX(ga.checkin_time) IS NOT NULL;",crux_assign,postgres,"SELECT e.full_name, e.email, TO_CHAR(e.date_of_joining, 'DD-MM-YYYY') AS join_date FROM employees e LEFT JOIN employee_goals eg ON e.id = eg.employee_id WHERE eg.updated_at < '2024-01-01' OR eg.updated_at IS NULL;","SELECT e.full_name, e.date_of_joining, e.updated_at AS last_goal_update FROM employees e LEFT JOIN employee_goals g ON e.id = g.employee_id WHERE g.updated_at < '2024-01-01' OR g.updated_at IS NULL;",0,1,0,1,1,0,1.8441424369812,1.84325981140137,9.2231867313385,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE employee_goals (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  employee_id bigint,
+  discarded_at timestamp without time without time zone
+);","Error (psycopg2.errors.UndefinedColumn) column e.email does not exist
+LINE 1: SELECT e.full_name, e.email, TO_CHAR(e.date_of_joining, 'DD-...
+                            ^
+
+[SQL: SELECT e.full_name, e.email, TO_CHAR(e.date_of_joining, 'DD-MM-YYYY') AS join_date FROM employees e LEFT JOIN employee_goals eg ON e.id = eg.employee_id WHERE eg.updated_at < '2024-01-01' OR eg.updated_at IS NULL;]
+(Background on this error at: https://sqlalche.me/e/20/f405)",,,
+Identify goals that have been reassigned from one department to another,"SELECT g.title, orig_d.name AS original_department, new_d.name AS new_department FROM goals g JOIN goals_departments gd_orig ON g.id = gd_orig.goal_id JOIN departments orig_d ON gd_orig.department_id = orig_d.id JOIN goals_departments gd_new ON g.id = gd_new.goal_id JOIN departments new_d ON gd_new.department_id = new_d.id WHERE orig_d.id != new_d.id AND g.discarded_at IS NULL;",crux_assign,postgres,"SELECT g.title AS goal_title, d1.name AS from_department, d2.name AS to_department
+FROM goals g
+JOIN departments d1 ON g.department_id = d1.id
+JOIN departments d2 ON g.department_id = d2.id
+WHERE d1.name <> d2.name;","SELECT g.title AS goal_title, g.start_date AS start_date, g.updated_at AS updated_date, gd.created_at AS reassignment_date, gd.department_id AS new_department_id FROM goals g JOIN goals_departments gd ON g.id = gd.goal_id WHERE gd.department_id <> g.department_id;",1,0,1,0,0,0,2.41230487823486,1.84352803230286,5.27134966850281,"CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE goals_departments (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  department_id bigint
+);",,,,
+Calculate the percentage of goals achieved per department for the last quarter,"SELECT d.name, COALESCE(SUM(CASE WHEN gp.progress_status = 4 THEN 1 ELSE 0 END) * 100.0 / COUNT(gp.id), 0) AS percent_achieved FROM departments d JOIN goals_departments gd ON d.id = gd.department_id JOIN goals g ON gd.goal_id = g.id JOIN goal_progresses gp ON g.id = gp.goal_id JOIN goal_cycles gc ON g.goal_cycle_id = gc.id WHERE gc.cycle = 'quarterly' AND gc.year = '2023' AND gc.name = 'Q1' AND d.active = TRUE AND g.discarded_at IS NULL GROUP BY d.name;",crux_assign,postgres,"SELECT department_name, COUNT(*) AS total_goals, SUM(CASE WHEN progress_status = 3 THEN 1 ELSE 0 END) AS achieved_goals, (SUM(CASE WHEN progress_status = 3 THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS percentage_achieved FROM goals JOIN goal_progresses ON goals.id = goal_progresses.goal_id WHERE EXTRACT(QUARTER FROM goals.due_date) = EXTRACT(QUARTER FROM CURRENT_DATE) - 1 AND EXTRACT(YEAR FROM goals.due_date) = EXTRACT(YEAR FROM CURRENT_DATE) GROUP BY department_name;","SELECT department_name, 
+       SUM(CASE WHEN progress_status = 3 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100 AS percentage_achieved
+FROM goals
+JOIN departments ON goals.department_id = departments.id
+JOIN goal_progresses ON goals.id = goal_progresses.goal_id
+WHERE goal_progresses.created_at >= DATE_TRUNC('quarter', CURRENT_DATE) - INTERVAL '3 months'
+GROUP BY department_name;",0,1,0,1,0,0,3.68828344345093,2.48944640159607,7.4797306060791,"CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);
+
+CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE goal_progresses (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  progress_start numeric(38,9),
+  progress_status bigint,
+  progress_target numeric(38,9),
+  progress_weight bigint,
+  current_progress numeric(38,9),
+  progress_percent numeric(38,9),
+  goal_progress_type_id bigint
+);",,,,
+Calculate the percentage of employees who are goal admins and their average goal achievement,"SELECT AVG(gp.progress_percent) AS avg_achievement, COUNT(e.id) AS total_goal_admins FROM employees e JOIN employee_goals eg ON e.id = eg.employee_id JOIN goals g ON eg.goal_id = g.id JOIN goal_progresses gp ON g.id = gp.goal_id WHERE e.goal_admin = TRUE AND g.discarded_at IS NULL AND gp.discarded_at IS NULL;",crux_assign,postgres,"SELECT AVG(goal_progress) AS avg_goal_achievement, (COUNT(*) * 100 / (SELECT COUNT(*) FROM employees)) AS goal_admin_percentage FROM employees WHERE goal_admin = TRUE;","SELECT COUNT(*) AS total_goal_admins, AVG(gp.current_progress) AS avg_goal_achievement FROM employees e LEFT JOIN goal_progresses gp ON e.id = gp.goal_id WHERE e.goal_admin = true;",0,1,0,1,1,0,1.55422639846802,2.04902672767639,9.99123668670654,"CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE goal_progresses (
+  id bigint,
+  goal_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  progress_start numeric(38,9),
+  progress_status bigint,
+  progress_target numeric(38,9),
+  progress_weight bigint,
+  current_progress numeric(38,9),
+  progress_percent numeric(38,9),
+  goal_progress_type_id bigint
+);","Error (psycopg2.errors.UndefinedColumn) column ""goal_progress"" does not exist
+LINE 1: SELECT AVG(goal_progress) AS avg_goal_achievement, (COUNT(*)...
+                   ^
+
+[SQL: SELECT AVG(goal_progress) AS avg_goal_achievement, (COUNT(*) * 100 / (SELECT COUNT(*) FROM employees)) AS goal_admin_percentage FROM employees WHERE goal_admin = TRUE;]
+(Background on this error at: https://sqlalche.me/e/20/f405)",,,
+Determine the role-based distribution of goals within the company,"SELECT e.org_role, COUNT(g.id) AS goals_count FROM employees e JOIN employee_goals eg ON e.id = eg.employee_id JOIN goals g ON eg.goal_id = g.id WHERE g.discarded_at IS NULL GROUP BY e.org_role;",crux_assign,postgres,"SELECT acl_roles.name AS role_name, COUNT(goals.id) AS goal_count
+FROM acl_roles
+LEFT JOIN users ON acl_roles.account_id = users.id
+LEFT JOIN employees ON users.id = employees.user_id
+LEFT JOIN goals ON employees.id = goals.department_id
+GROUP BY acl_roles.name;","SELECT e.org_role AS role, COUNT(g.id) AS goal_count FROM employees e LEFT JOIN goals g ON e.department_id = g.department_id GROUP BY e.org_role;",1,1,1,1,0,0,1.94535136222839,1.58279871940613,14.7072784900665,"CREATE TABLE goals (
+  id bigint,
+  title character varying,
+  native boolean,
+  public boolean,
+  ancestry character varying,
+  due_date timestamp without time zone,
+  goal_type bigint,
+  account_id bigint,
+  created_at timestamp without time zone,
+  start_date timestamp without time zone,
+  updated_at timestamp without time zone,
+  added_by_id bigint,
+  description character varying,
+  discarded_at timestamp without time zone,
+  is_milestone boolean,
+  department_id bigint,
+  goal_cycle_id bigint,
+  is_key_result boolean,
+  weighted_goal boolean,
+  ancestry_depth bigint,
+  has_milestones boolean,
+  objective_type bigint,
+  department_name character varying,
+  duplicated_from_id bigint,
+  has_milestone_goals boolean,
+  milestone_split_type bigint
+);
+
+CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);
+
+CREATE TABLE employees (
+  id bigint,
+  age bigint,
+  level character varying,
+  title character varying,
+  gender character varying,
+  invited boolean,
+  user_id bigint,
+  division character varying,
+  location character varying,
+  org_role character varying,
+  timezone character varying,
+  full_name character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  first_name character varying,
+  goal_admin boolean,
+  manager_id bigint,
+  updated_at timestamp without time zone,
+  nps_enabled boolean,
+  activated_at timestamp without time zone,
+  date_of_exit timestamp without time zone,
+  phone_number character varying,
+  account_admin boolean,
+  business_unit character varying,
+  department_id bigint,
+  anonymous_name character varying,
+  billing_status character varying,
+  deactivated_at timestamp without time zone,
+  cc_meeting_pref bigint,
+  date_of_joining timestamp without time zone,
+  department_name character varying,
+  employee_source character varying,
+  employment_type character varying,
+  profile_picture character varying,
+  pulse_frequency character varying,
+  reportees_count bigint,
+  run_coffee_connect boolean,
+  company_employee_id character varying,
+  primary_phone_number character varying,
+  relationship_updated boolean,
+  send_manager_checkin boolean,
+  one_on_ones_updated_at timestamp without time zone,
+  personal_email_address character varying,
+  secondary_phone_number character varying,
+  calendar_event_organizer_id bigint,
+  calendar_data_last_updated_at timestamp without time zone
+);
+
+CREATE TABLE departments (
+  id bigint,
+  name character varying,
+  active boolean,
+  ancestry character varying,
+  account_id bigint,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  discarded_at timestamp without time zone,
+  ancestry_depth bigint,
+  department_type bigint,
+  department_type_name character varying
+);",,,,
